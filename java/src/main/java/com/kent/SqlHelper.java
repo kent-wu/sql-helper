@@ -8,28 +8,32 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SqlHelper {
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
+        if (args.length < 1) {
             System.out.println("-------------------------");
             System.out.println("usage:");
-            System.out.println("sqlHelper.jar [sqlPath] [targetFileName]\n");
+            System.out.println("java -jar sqlHelper.jar [sqlPath]");
             System.out.println("example:");
-            System.out.println("sqlHelper.jar ../sql/*.sql merge.file");
+            System.out.println("java -jar sqlHelper.jar ../sql/*.sql");
             System.out.println("-------------------------");
             return;
         }
 
         String path = args[0];
-        String targetFileName = args[1];
+        String targetFileName = "merge.sql";
 
-        Finder finder = new Finder(GlobUtils.getGlob(path));
         Path currentPath = GlobUtils.getPath(path);
 
-        Files.walkFileTree(currentPath, finder);
+        List<Path> sqlFiles = new ArrayList<>();
+        for (int i = 0; i < args.length; i++) {
+            sqlFiles.add(Paths.get(currentPath + "/" + args[i]));
+        }
 
-        String contents = SqlFileReader.readerFiles(finder.getMatchFiles());
+        String contents = SqlFileReader.readerFiles(sqlFiles);
 
         String targetFile = currentPath + "/" + targetFileName;
         SqlFileWriter.writeFile(Paths.get(targetFile), contents);

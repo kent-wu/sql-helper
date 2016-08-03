@@ -8,7 +8,7 @@ public class GlobUtils {
         String currentPath = System.getProperty("user.dir");
         String directory = path.substring(0, path.lastIndexOf("/"));
 
-        return Paths.get(String.join("/", currentPath, directory));
+        return Paths.get(String.format("%s/%s", currentPath, directory));
     }
 
     public static String getGlob(String path) {

@@ -5,13 +5,14 @@ import com.kent.io.SqlFileWriter;
 import com.kent.utils.GlobUtils;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+
+import static com.kent.utils.Contants.FILE_SEPARATOR;
 
 public class SqlHelper {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         if (args.length < 1) {
             System.out.println("-------------------------");
             System.out.println("usage:");
@@ -25,18 +26,19 @@ public class SqlHelper {
         String path = args[0];
         String targetFileName = "merge.sql";
 
+        Finder finder = new Finder(GlobUtils.getGlob(path));
+
         Path currentPath = GlobUtils.getPath(path);
+        String targetFile = currentPath + FILE_SEPARATOR + targetFileName;
 
-        List<Path> sqlFiles = new ArrayList<>();
-        for (int i = 0; i < args.length; i++) {
-            sqlFiles.add(Paths.get(currentPath + "/" + args[i]));
+        try {
+            Files.walkFileTree(currentPath, finder);
+            String contents = SqlFileReader.readerFiles(finder.getMatchFiles());
+            SqlFileWriter.writeFile(Paths.get(targetFile), contents);
+
+            System.out.println(String.format("Merge to %s successfully!", targetFile));
+        } catch (IOException ex) {
+            System.err.format("IOException: %s%n", ex);
         }
-
-        String contents = SqlFileReader.readerFiles(sqlFiles);
-
-        String targetFile = currentPath + "/" + targetFileName;
-        SqlFileWriter.writeFile(Paths.get(targetFile), contents);
-
-        System.out.println(String.format("Merge to %s successfully!", targetFile));
     }
 }

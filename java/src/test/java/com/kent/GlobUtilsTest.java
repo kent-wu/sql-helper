@@ -20,7 +20,5 @@ public class GlobUtilsTest {
     public void should_get_glob() throws Exception {
         String glob = GlobUtils.getGlob("../sql/*.sql");
         assertThat(glob,is("glob:**/*.sql"));
-
-
     }
 }
